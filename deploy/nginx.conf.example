@@ -1,0 +1,35 @@
+# Copier vers : /etc/nginx/sites-available/symbioll
+# Puis activer : ln -s /etc/nginx/sites-available/symbioll /etc/nginx/sites-enabled/
+#
+# Remplacez :
+#   symbioll.votredomaine.com  → votre domaine ou sous-domaine
+#   /var/www/symbioll          → chemin d'installation sur le VPS
+#   php8.2-fpm.sock            → version PHP-FPM installée sur le serveur
+
+server {
+    listen 80;
+    server_name symbioll.votredomaine.com;
+
+    root /var/www/symbioll;
+    index index.php index.html;
+
+    access_log /var/log/nginx/symbioll.access.log;
+    error_log /var/log/nginx/symbioll.error.log;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+
+    location ~ ^/(config\.php|schema\.sql|config\.example\.php)$ {
+        deny all;
+    }
+}
